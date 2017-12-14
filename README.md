@@ -1,5 +1,5 @@
-# CryptoWoo Bitcoin Cash Add-on
-Accept payments in Bitcoin Cash in WooCommerce with CryptoWoo.
+# CryptoWoo Vertcoin Add-on
+Accept payments in Vertcoin in WooCommerce with CryptoWoo.
 
 ## Requirements
 [WordPress](https://wordpress.org/download/)  
@@ -19,6 +19,6 @@ Contribute to development of this plugin.
 
 **1H1CjSMwLjeeuuMbumdQCRoxAyAGKfi3Mc**
 
-Send Bitcoin Cash or Bitcoin Core.
+Send Vertcoin or Bitcoin Core.
 
 Thanks for your support!
