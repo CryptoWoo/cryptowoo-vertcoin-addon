@@ -120,7 +120,6 @@ if ( cwvtc_hd_enabled() ) {
 	// Exchange rates
 	add_filter( 'cw_force_update_exchange_rates', 'cwvtc_force_update_exchange_rates', 10, 2 );
 	add_filter( 'cw_cron_update_exchange_data', 'cwvtc_cron_update_exchange_data', 10, 2 );
-	add_filter( 'cw_get_bittrex_price_coin', 'cwvtc_get_bittrex_price_coin', 10, 1 );
 
 	// Catch failing processing API (only if processing_fallback is enabled)
 	add_filter( 'cw_get_tx_api_config', 'cwvtc_cw_get_tx_api_config', 10, 3 );
@@ -463,7 +462,7 @@ function cwvtc_get_mpk_data_mpk_key( $mpk_key, $currency, $options ) {
  */
 function cwvtc_get_mpk_data_network( $mpk_data, $currency, $options ) {
 	if ( $currency === 'VTC' ) {
-		$mpk_data->network = BitWasp\Bitcoin\Network\NetworkFactory::create( '?', '?', '?' )->setHDPubByte('0488b21e')->setHDPrivByte('0488ade4')->setNetMagicBytes('?');
+		$mpk_data->network = BitWasp\Bitcoin\Network\NetworkFactory::bitcoin();
 	}
 
 	return $mpk_data;
@@ -503,21 +502,6 @@ function cwvtc_cron_update_exchange_data( $data, $options ) {
 	}
 
 	return $data;
-}
-
-/**
- * Override Bittrex coin name (VTC instead of VTC)
- *
- * @param $currency
- *
- * @return string
- */
-function cwvtc_get_bittrex_price_coin( $currency ) {
-	if ( $currency === 'VTC' ) {
-		$currency = 'VTC';
-	}
-
-	return $currency;
 }
 
 /**
