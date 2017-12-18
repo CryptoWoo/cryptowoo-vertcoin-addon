@@ -139,24 +139,6 @@ if ( cwvtc_hd_enabled() ) {
 }
 
 /**
- * Vertcoin font color for aw-cryptocoins
- * see cryptowoo/assets/fonts/aw-cryptocoins/cryptocoins-colors.css
- */
-function cwvtc_coin_icon_color() { ?>
-    <style type="text/css">
-        i.cc.VTC:before, i.cc.VTC-alt:before {
-            content: "\e9a6";
-        }
-
-        i.cc.VTC, i.cc.VTC-alt {
-            color: #F7931A;
-        }
-    </style>
-<?php }
-
-add_action( 'wp_head', 'cwvtc_coin_icon_color' );
-
-/**
  * Processing API configuration error
  *
  * @param $enabled
