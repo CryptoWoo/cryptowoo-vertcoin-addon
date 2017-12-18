@@ -290,7 +290,7 @@ function cwvtc_processing_config( $pc_conf, $currency, $options ) {
  */
 function cwvtc_link_to_address( $url, $address, $currency, $options ) {
 	if ( $currency === 'VTC' ) {
-		$url = "http://blockdozer.com/insight/address/{$address}";
+		$url = "http://explorer.vertcoin.info/address/{$address}";
 		if ( $options['preferred_block_explorer_vtc'] === 'custom' && isset( $options['custom_block_explorer_vtc'] ) ) {
 			$url = preg_replace( '/{{ADDRESS}}/', $address, $options['custom_block_explorer_vtc'] );
 			if ( ! wp_http_validate_url( $url ) ) {
@@ -303,7 +303,7 @@ function cwvtc_link_to_address( $url, $address, $currency, $options ) {
 }
 
 /**
- * Do blockdozer insight api processing if chosen
+ * Do explorer.vertcoin.info api processing if chosen
  *
  * @param $batch_data
  * @param $batch_currency
@@ -314,8 +314,8 @@ function cwvtc_link_to_address( $url, $address, $currency, $options ) {
  * @return string
  */
 function cwvtc_cw_update_tx_details( $batch_data, $batch_currency, $orders, $processing, $options ) {
-	if ( $batch_currency == "VTC" && $options['processing_api_vtc'] == "blockdozer" ) {
-		$options['custom_api_vtc']     = "http://blockdozer.com/insight-api/";
+	if ( $batch_currency == "VTC" && $options['processing_api_vtc'] == "vertcoin.info" ) {
+		$options['custom_api_vtc']     = "explorer.vertcoin.info/ext/getaddress/";
 		$batch                         = [ 0 => $orders[0]->address ];
 		$batch_data[ $batch_currency ] = CW_Insight::insight_batch_tx_update( "VTC", $batch, $orders, $options );
 		usleep( 333333 ); // Max ~3 requests/second TODO remove when we have proper rate limiting
@@ -615,11 +615,11 @@ function cwvtc_filter_batch( $address_batch, $address ) {
 function cwvtc_cw_get_tx_api_config( $api_config, $currency ) {
 	// ToDo: add Blockcypher
 	if ( $currency === 'VTC' ) {
-		if ( $api_config->tx_update_api === 'blockdozer' ) {
+		if ( $api_config->tx_update_api === 'vertcoin.info' ) {
 			$api_config->tx_update_api   = 'insight';
 			$api_config->skip_this_round = false;
 		} else {
-			$api_config->tx_update_api   = 'blockdozer';
+			$api_config->tx_update_api   = 'vertcoin.info';
 			$api_config->skip_this_round = false;
 		}
 	}
@@ -783,8 +783,8 @@ function cwvtc_add_fields() {
 		'title'             => sprintf( __( '%s Processing API', 'cryptowoo' ), 'Vertcoin' ),
 		'subtitle'          => sprintf( __( 'Choose the API provider you want to use to look up %s payments.', 'cryptowoo' ), 'Vertcoin' ),
 		'options'           => array(
-			'blockdozer' => 'Blockdozer.com',
-			'custom'     => __( 'Custom (no testnet)', 'cryptowoo' ),
+			'vertcoin.info' => 'explorer.vertcoin.info',
+			'custom'     => __( 'Custom (insight)', 'cryptowoo' ),
 			'disabled'   => __( 'Disabled', 'cryptowoo' ),
 		),
 		'desc'              => '',
@@ -819,8 +819,8 @@ function cwvtc_add_fields() {
 		'type'              => 'text',
 		'title'             => sprintf( __( '%s Insight API URL', 'cryptowoo' ), 'Vertcoin' ),
 		'subtitle'          => sprintf( __( 'Connect to any %sInsight API%s instance.', 'cryptowoo' ), '<a href="https://github.com/bitpay/insight-api/" title="Insight API" target="_blank">', '</a>' ),
-		'desc'              => sprintf( __( 'The root URL of the API instance:%sLink to address:%shttp://blockdozer.com/insight-api/txs?address=%sRoot URL: %shttp://blockdozer.com/insight-api/%s', 'cryptowoo-vtc-addon' ), '<p>', '<code>', '</code><br>', '<code>', '</code></p>' ),
-		'placeholder'       => 'http://blockdozer.com/insight-api/',
+		'desc'              => sprintf( __( 'The root URL of the API instance:%sLink to address:%sexplorer.vertcoin.info/ext/getaddress/%sRoot URL: %explorer.vertcoin.info%s', 'cryptowoo-vtc-addon' ), '<p>', '<code>', '</code><br>', '<code>', '</code></p>' ),
+		'placeholder'       => 'explorer.vertcoin.info',
 		'required'          => array( 'processing_api_vtc', 'equals', 'custom' ),
 		'validate_callback' => 'redux_validate_custom_api',
 		'ajax_save'         => false,
@@ -851,13 +851,13 @@ function cwvtc_add_fields() {
 		'type'              => 'text',
 		'title'             => sprintf( __( 'Blockdozer Vertcoin API Fallback', 'cryptowoo' ), 'Vertcoin' ),
 		'subtitle'          => sprintf( __( 'Fallback to any %sInsight API%s instance in case the Blockdozer API fails. Retry Blockdozer upon beginning of the next hour. Leave empty to disable.', 'cryptowoo' ), '<a href="https://github.com/bitpay/insight-api/" title="Insight API" target="_blank">', '</a>' ),
-		'desc'              => sprintf( __( 'The root URL of the API instance:%sLink to address:%shttp://blockdozer.com/insight-api/txs?address=XtuVUju4Baaj7YXShQu4QbLLR7X2aw9Gc8%sRoot URL: %shttp://blockdozer.com/insight-api/%s', 'cryptowoo-vtc-addon' ), '<p>', '<code>', '</code><br>', '<code>', '</code></p>' ),
-		'placeholder'       => 'http://blockdozer.com/insight-api/',
+		'desc'              => sprintf( __( 'The root URL of the API instance:%sLink to address:%sexplorer.vertcoin.info/ext/getaddress/XtuVUju4Baaj7YXShQu4QbLLR7X2aw9Gc8%sRoot URL: %sexplorer.vertcoin.info%s', 'cryptowoo-vtc-addon' ), '<p>', '<code>', '</code><br>', '<code>', '</code></p>' ),
+		'placeholder'       => 'explorer.vertcoin.info',
 		'required'          => array( 'processing_api_vtc', 'equals', 'blockcypher' ),
 		'validate_callback' => 'redux_validate_custom_api',
 		'ajax_save'         => false,
 		'msg'               => __( 'Invalid VTC Insight API URL', 'cryptowoo' ),
-		'default'           => 'http://blockdozer.com/insight-api/',
+		'default'           => 'explorer.vertcoin.info',
 		'text_hint'         => array(
 			'title'   => 'Please Note:',
 			'content' => __( 'Make sure the root URL of the API has a trailing slash ( / ).', 'cryptowoo' ),
@@ -915,10 +915,10 @@ function cwvtc_add_fields() {
 		'desc'       => '',
 		'options'    => array(
 			'autoselect' => __( 'Autoselect by processing API', 'cryptowoo' ),
-			'blockdozer' => 'blockdozer.com',
+			'vertcoin.info' => 'explorer.vertcoin.info',
 			'custom'     => __( 'Custom (enter URL below)' ),
 		),
-		'default'    => 'blockdozer',
+		'default'    => 'vertcoin.info',
 		'select2'    => array( 'allowClear' => false )
 	) );
 
@@ -941,7 +941,7 @@ function cwvtc_add_fields() {
 		'title'             => sprintf( __( 'Custom %s Block Explorer URL', 'cryptowoo' ), 'Vertcoin' ),
 		'subtitle'          => __( 'Link to a block explorer of your choice.', 'cryptowoo' ),
 		'desc'              => sprintf( __( 'The URL to the page that displays the information for a single address.%sPlease add %s{{ADDRESS}}%s as placeholder for the cryptocurrency address in the URL.%s', 'cryptowoo' ), '<br><strong>', '<code>', '</code>', '</strong>' ),
-		'placeholder'       => 'http://blockdozer.com/insight-api/txs?address={$address}',
+		'placeholder'       => 'explorer.vertcoin.info/ext/getaddress/{$address}',
 		'required'          => array( 'preferred_block_explorer_vtc', '=', 'custom' ),
 		'validate_callback' => 'redux_validate_custom_blockexplorer',
 		'ajax_save'         => false,
