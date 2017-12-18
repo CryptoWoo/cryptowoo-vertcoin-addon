@@ -462,7 +462,7 @@ function cwvtc_get_mpk_data_mpk_key( $mpk_key, $currency, $options ) {
  */
 function cwvtc_get_mpk_data_network( $mpk_data, $currency, $options ) {
 	if ( $currency === 'VTC' ) {
-		$mpk_data->network = BitWasp\Bitcoin\Network\NetworkFactory::bitcoin();
+		$mpk_data->network = BitWasp\Bitcoin\Network\NetworkFactory::create( '47', '05', '80' )->setHDPubByte('0488b21e')->setHDPrivByte('0488ade4')->setNetMagicBytes('fabfb5da');
 	}
 
 	return $mpk_data;
