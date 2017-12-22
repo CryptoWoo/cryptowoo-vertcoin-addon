@@ -324,20 +324,23 @@ function cwvtc_cw_update_tx_details( $batch_data, $batch_currency, $orders, $pro
         // Convert to correct format for insight_tx_analysis
         if (isset($batch_data["VTC"]) && is_object($batch_data["VTC"])) {
             $vtcData = $batch_data["VTC"];
-	        $address = $vtcData->address;
-	        $txs = $vtcData->last_txs;
-	        if ($vtcData->received > 0 && $vtcData->balance > 0) {
-	            $txs[0]->confirmations = 1;
-            } else {
-		        $txs[0]->confirmations = 0;
+            // There is only an incoming payment if address exist
+            if (isset($vtcData->address)) {
+	            $address = $vtcData->address;
+	            $txs = $vtcData->last_txs;
+	            if ($vtcData->received > 0 && $vtcData->balance > 0) {
+		            $txs[0]->confirmations = 1;
+	            } else {
+		            $txs[0]->confirmations = 0;
+	            }
+	            $txs[0]->time = strtotime($orders[0]->created_at);
+	            $txs[0]->txid = $txs[0]->addresses;
+	            $vout = new stdClass();
+	            $vout->scriptPubKey->addresses = [$address];
+	            $vout->value = $vtcData->received;
+	            $txs[0]->vout = [$vout];
+	            $batch_data[$address] = $txs;
             }
-            $txs[0]->time = strtotime($orders[0]->created_at);
-	        $txs[0]->txid = $txs[0]->addresses;
-	        $vout = new stdClass();
-	        $vout->scriptPubKey->addresses = [$address];
-	        $vout->value = $vtcData->received;
-	        $txs[0]->vout = [$vout];
-	        $batch_data[$address] = $txs;
         } else {
             // ToDo: log error
             $batch_data = [];
