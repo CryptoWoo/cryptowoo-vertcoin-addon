@@ -13,12 +13,12 @@ Accept payments in Vertcoin in WooCommerce with CryptoWoo.
 3. Activate plugin.
 
 # Donate
-<img align="left" src="https://blockchain.info/qr?data=1H1CjSMwLjeeuuMbumdQCRoxAyAGKfi3Mc&size=150">  
+<img align="left" src="https://blockchain.info/qr?data=Vr7ExTDGkH9LXVFLawsSEcBJjNBdTdacPY&size=150">  
 
 Contribute to development of this plugin.
 
-**1H1CjSMwLjeeuuMbumdQCRoxAyAGKfi3Mc**
+**Vr7ExTDGkH9LXVFLawsSEcBJjNBdTdacPY**
 
-Send Vertcoin or Bitcoin Core.
+Send Vertcoin.
 
 Thanks for your support!
