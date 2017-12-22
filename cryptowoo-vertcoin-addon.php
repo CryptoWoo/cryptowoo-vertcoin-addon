@@ -314,13 +314,136 @@ function cwvtc_link_to_address( $url, $address, $currency, $options ) {
  */
 function cwvtc_cw_update_tx_details( $batch_data, $batch_currency, $orders, $processing, $options ) {
 	if ( $batch_currency == "VTC" && $options['processing_api_vtc'] == "vertcoin.info" ) {
-		$options['custom_api_vtc']     = "explorer.vertcoin.info/ext/getaddress/";
-		$batch                         = [ 0 => $orders[0]->address ];
-		$batch_data[ $batch_currency ] = CW_Insight::insight_batch_tx_update( "VTC", $batch, $orders, $options );
+		$options['custom_api_vtc']     = "http://explorer.vertcoin.info/";
+		$batch                         = $orders[0]->address;
+		$batch_data[ $batch_currency ] = cwvtc_vertcoin_api_tx_update( $batch, $orders[0], $options );
 		usleep( 333333 ); // Max ~3 requests/second TODO remove when we have proper rate limiting
+
+        $chain_height = cwvtc_vertcoin_api_get_block_height($options);
+
+        // Convert to correct format for insight_tx_analysis
+        if (isset($batch_data["VTC"]) && is_object($batch_data["VTC"])) {
+            $vtcData = $batch_data["VTC"];
+	        $address = $vtcData->address;
+	        $txs = $vtcData->last_txs;
+	        if ($vtcData->received > 0 && $vtcData->balance > 0) {
+	            $txs[0]->confirmations = 1;
+            } else {
+		        $txs[0]->confirmations = 0;
+            }
+            $txs[0]->time = strtotime($orders[0]->created_at);
+	        $txs[0]->txid = $txs[0]->addresses;
+	        $vout = new stdClass();
+	        $vout->scriptPubKey->addresses = [$address];
+	        $vout->value = $vtcData->received;
+	        $txs[0]->vout = [$vout];
+	        $batch_data[$address] = $txs;
+        } else {
+            // ToDo: log error
+            $batch_data = [];
+        }
+
+        $batch_data = CW_Insight::insight_tx_analysis($orders, $batch_data, $options, $chain_height, true);
 	}
 
 	return $batch_data;
+}
+
+function cwvtc_vertcoin_api_get_block_height($options) {
+    $currency = "VTC";
+
+	$bh_transient = sprintf('block-height-%s', $currency);
+	if(false !== ($block_height = get_transient($bh_transient))) {
+		return (int)$block_height;
+	}
+
+	$error = '';
+
+	// Get data
+	$url = $options['custom_api_vtc'] . "api/getblockcount";
+
+	$result = wp_remote_get($url);
+
+	if (is_wp_error($result)) {
+
+		$error = $result->get_error_message();
+
+		// Action hook for Insight API error
+		do_action('cryptowoo_api_error', 'Insight API error: '.$error);
+
+		// Update rate limit transient
+		$limit_transient[$currency] = isset($limit_transient[$currency]['count']) ? array('count' => (int)$limit_transient[$currency]['count'] + 1,
+		                                                                                  'api' => 'insight') : array('count' => 1,
+		                                                                                                              'api' => 'insight');
+		// Keep error data until the next full hour (rate limits refresh every full hour). We'll try again after that time.
+		set_transient('cryptowoo_limit_rates', $limit_transient, CW_AdminMain::seconds_to_next_hour());
+
+	} else {
+		$result = json_decode($result['body']);
+	}
+
+	if(isset($result) && is_integer($result)) {
+		$block_height = $result;
+		set_transient($bh_transient, $block_height, 180); // Cache for 3 minutes
+	} else {
+		$block_height = 0;
+	}
+
+	if ((bool)$error) {
+		file_put_contents(CW_LOG_DIR . 'cryptowoo-tx-update.log', date('Y-m-d H:i:s') . " Insight get_block_height {$error}\r\n", FILE_APPEND);
+	}
+	return (int)$block_height;
+}
+
+function cwvtc_vertcoin_api_tx_update($address, $order, $options) {
+    $currency = "VTC";
+	$error = $result = false;
+
+	// Rate limit transient
+	$limit_transient = get_transient('cryptowoo_limit_rates');
+
+	// Get data
+	$url = $options['custom_api_vtc'] . "ext/getaddress/" . $address;
+
+	$result = wp_remote_get($url);
+
+	if (is_wp_error($result)) {
+	    $error = $result->get_error_message();
+
+	    // Error "A valid URL was not provided means Vertcoin address did not receive any payment
+	    if ($error == "A valid URL was not provided.") {
+            $error = false;
+            $result = [];
+        } else {
+		    $error = $error . $url ;
+
+		    // Action hook for API error
+		    do_action('cryptowoo_api_error', 'API error: '.$error);
+
+		    // Update rate limit transient
+		    if(isset($limit_transient[$currency]['count'])) {
+			    $limit_transient[$currency] = array(
+				    'count' => (int)$limit_transient[$currency]['count'] + 1,
+				    'api' => 'explorer.vertcoin.info'
+			    );
+		    } else {
+			    $limit_transient[$currency] = array(
+				    'count' => 1,
+				    'api' => 'explorer.vertcoin.info'
+			    );
+		    }
+		    // Keep error data until the next full hour (rate limits refresh every full hour). We'll try again after that time.
+		    set_transient('cryptowoo_limit_rates', $limit_transient, CW_AdminMain::seconds_to_next_hour());
+		    file_put_contents(CW_LOG_DIR . 'cryptowoo-tx-update.log', date('Y-m-d H:i:s') . " Insight full address error {$error}\r\n", FILE_APPEND);
+        }
+	} else {
+		$result = json_decode($result['body']);
+	}
+	// Delete rate limit transient if the last call was successful
+	if (false !== $limit_transient && false === $error) {
+		delete_transient('cryptowoo_limit_rates');
+	}
+	return false !== $error ? $error : $result;
 }
 
 
