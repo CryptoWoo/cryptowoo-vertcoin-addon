@@ -775,7 +775,7 @@ function cwvtc_add_fields() {
 		'default'    => 1,
 		'min'        => 1,
 		'step'       => 1,
-		'max'        => 100,
+		'max'        => 1,
 	) );
 
 	// ToDo: Enable raw zeroconf
