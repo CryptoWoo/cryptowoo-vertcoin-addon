@@ -219,7 +219,7 @@ function cwvtc_add_coin_identifier( $coin_identifiers ) {
  * @return array
  */
 function cwvtc_address_prefixes( $prefixes ) {
-	$prefixes['VTC']          = '00';
+	$prefixes['VTC']          = '47';
 	$prefixes['VTC_MULTISIG'] = '05';
 
 	return $prefixes;
