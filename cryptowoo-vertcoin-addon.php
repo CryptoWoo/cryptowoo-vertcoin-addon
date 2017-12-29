@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Forked From: Olsm/cryptowoo-bitcoin-cash-addon
  * - Bitcoin Cash Addon was Forked From: CryptoWoo/cryptowoo-dash-addon, Author: flxstn
  * Description: Accept VTC payments in WooCommerce. Requires CryptoWoo main plugin and CryptoWoo HD Wallet Add-on.
- * Version: 1.0
+ * Version: 1.1
  * Author: Olav Småriset
  * Author URI: https://github.com/Olsm
  * License: GPLv2
@@ -19,8 +19,21 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  */
 
-define( 'CWVTC_VER', '1.0' );
+define( 'CWVTC_VER', '1.1' );
 define( 'CWVTC_FILE', __FILE__ );
+$plugin_dir     = WP_PLUGIN_DIR;
+$hd_add_on_file = 'cryptowoo-hd-wallet-addon/cryptowoo-hd-wallet-addon.php';
+$hd_add_on_dir  = $plugin_dir . '/' . $hd_add_on_file;
+$cw_plugin_dir  = $plugin_dir . '/cryptowoo/cryptowoo.php';
+
+// Load the plugin update library if it is not already loaded
+if ( ! class_exists( 'CWVTC_License_Menu' ) && file_exists( plugin_dir_path( $hd_add_on_dir ) . 'am-license-menu.php' ) ) {
+	require_once( plugin_dir_path( $hd_add_on_dir ) . 'am-license-menu.php' );
+
+	class CWVTC_License_Menu extends CW_License_Menu {};
+
+	CWVTC_License_Menu::instance( CWVTC_FILE, 'CryptoWoo Vertcoin Add-on', CWVTC_VER, 'plugin', 'https://www.cryptowoo.com/' );
+}
 
 /**
  * Plugin activation
