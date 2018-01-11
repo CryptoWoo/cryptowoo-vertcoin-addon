@@ -21,14 +21,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'CWVTC_VER', '1.1' );
 define( 'CWVTC_FILE', __FILE__ );
-$plugin_dir     = WP_PLUGIN_DIR;
-$hd_add_on_file = 'cryptowoo-hd-wallet-addon/cryptowoo-hd-wallet-addon.php';
-$hd_add_on_dir  = $plugin_dir . '/' . $hd_add_on_file;
-$cw_plugin_dir  = $plugin_dir . '/cryptowoo/cryptowoo.php';
+$cw_dir = WP_PLUGIN_DIR . "/cryptowoo";
+$cw_license_path = "$cw_dir/am-license-menu.php";
 
 // Load the plugin update library if it is not already loaded
-if ( ! class_exists( 'CWVTC_License_Menu' ) && file_exists( plugin_dir_path( $hd_add_on_dir ) . 'am-license-menu.php' ) ) {
-	require_once( plugin_dir_path( $hd_add_on_dir ) . 'am-license-menu.php' );
+if ( ! class_exists( 'CWVTC_License_Menu' ) && file_exists( $cw_license_path ) ) {
+	require_once( $cw_license_path );
 
 	class CWVTC_License_Menu extends CW_License_Menu {};
 
