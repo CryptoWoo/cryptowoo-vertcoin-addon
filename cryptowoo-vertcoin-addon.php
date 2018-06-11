@@ -28,7 +28,7 @@ $cw_license_path = "$cw_dir/am-license-menu.php";
 if ( ! class_exists( 'CWVTC_License_Menu' ) && file_exists( $cw_license_path ) ) {
 	require_once( $cw_license_path );
 
-	class CWVTC_License_Menu extends CW_License_Menu {};
+	class CWVTC_License_Menu extends CWoo_License_Menu {};
 
 	CWVTC_License_Menu::instance( CWVTC_FILE, 'CryptoWoo Vertcoin Add-on', CWVTC_VER, 'plugin', 'https://www.cryptowoo.com/' );
 }
