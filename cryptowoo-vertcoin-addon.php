@@ -125,7 +125,6 @@ if ( cwvtc_hd_enabled() ) {
 	add_filter( 'cw_filter_batch', 'cwvtc_filter_batch', 10, 2 );
 
 	// Add discovery button to currency option
-	//add_filter( 'redux/options/cryptowoo_payments/field/cryptowoo_vtc_mpk', 'hd_wallet_discovery_button' );
 	add_filter( 'redux/options/cryptowoo_payments/field/cryptowoo_vtc_mpk', 'hd_wallet_discovery_button' );
 
 	// Exchange rates
@@ -599,7 +598,12 @@ function cwvtc_get_mpk_data_mpk_key( $mpk_key, $currency, $options ) {
  */
 function cwvtc_get_mpk_data_network( $mpk_data, $currency, $options ) {
 	if ( $currency === 'VTC' ) {
-		$mpk_data->network = BitWasp\Bitcoin\Network\NetworkFactory::create( '47', '05', '80' )->setHDPubByte('0488b21e')->setHDPrivByte('0488ade4')->setNetMagicBytes('fabfb5da');
+		require_once 'Vertcoin.php';
+	    require_once 'VTC_NetworkFactory.php';
+		$mpk_data->network = BitWasp\Bitcoin\Network\VTC_NetworkFactory::vertcoin();
+		$mpk_data->network_config = new \BitWasp\Bitcoin\Key\Deterministic\HdPrefix\NetworkConfig($mpk_data->network, [
+			$mpk_data->slip132->p2pkh($mpk_data->bitcoinPrefixes)
+		]);
 	}
 
 	return $mpk_data;
